@@ -13,10 +13,10 @@ public class Participant {
     }
 
     public String getName(){
-        return name;
+        return this.name;
     }
 
     public Race getRace(){
-        return race;
+        return this.race;
     }
 }

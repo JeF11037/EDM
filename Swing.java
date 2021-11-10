@@ -13,10 +13,10 @@ public class Swing {
     }
 
     public int getSwingCount(){
-        return swingCount;
+        return this.swingCount;
     }
 
     public SwingType getSwingType(){
-        return swingType;
+        return this.swingType;
     }
 }

@@ -13,18 +13,18 @@ public class Encounter {
     }
 
     public Participant getElf(){
-        return elf;
+        return this.elf;
     }
 
     public Swing getElfinSwing(){
-        return elfinSwing;
+        return this.elfinSwing;
     }
 
     public Participant getDwarf(){
-        return dwarf;
+        return this.dwarf;
     }
 
     public Swing getDwarvenSwing(){
-        return dwarvenSwing;
+        return this.dwarvenSwing;
     }
 }
