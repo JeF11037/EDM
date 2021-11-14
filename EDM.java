@@ -1,108 +1,103 @@
 import java.util.List;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.io.File;
 
 public class EDM {
     private static Scanner scanner;
-    private final static int delay = 1;
-    private final static int delay_pause = 1;
+    private int delay = 10;
+    private final static int delay_pause = 5;
     private final static int[] blank_title = new int[] {3, 2};
     private final static int[] blank_heading = new int[] {2, 1}; 
-
-    private static Participant[] testParticipants = new Participant[]{
-        new Participant("Ave", Race.Elf),
-        new Participant("Elegast", Race.Elf),
-        new Participant("Taeriel", Race.Elf),
-        new Participant("Saeya", Race.Elf),
-        new Participant("Loralf", Race.Elf),
-        new Participant("Duthila", Race.Dwarf),
-        new Participant("Mondull", Race.Dwarf),
-        new Participant("Boltor", Race.Dwarf),
-        new Participant("Drummer", Race.Dwarf),
-    };
-
-    private static Encounter[] testEncounters = new Encounter[]{
-        new Encounter(testParticipants[0], new Swing(1, SwingType.R), testParticipants[5], new Swing(4, SwingType.R)),
-        new Encounter(testParticipants[1], new Swing(1, SwingType.R), testParticipants[5], new Swing(1, SwingType.R)),
-        new Encounter(testParticipants[2], new Swing(1, SwingType.L), testParticipants[5], new Swing(3, SwingType.L)),
-        new Encounter(testParticipants[3], new Swing(2, SwingType.R), testParticipants[5], new Swing(1, SwingType.L)),
-        new Encounter(testParticipants[4], new Swing(1, SwingType.R), testParticipants[5], new Swing(2, SwingType.R)),
-        new Encounter(testParticipants[2], new Swing(1, SwingType.R), testParticipants[1], new Swing(3, SwingType.R)),
-        new Encounter(testParticipants[1], new Swing(1, SwingType.R), testParticipants[1], new Swing(5, SwingType.R)),
-        new Encounter(testParticipants[2], new Swing(1, SwingType.R), testParticipants[2], new Swing(1, SwingType.R)),
-        new Encounter(testParticipants[4], new Swing(1, SwingType.R), testParticipants[2], new Swing(1, SwingType.R)),
-        new Encounter(testParticipants[4], new Swing(1, SwingType.R), testParticipants[3], new Swing(1, SwingType.R)),
-        new Encounter(testParticipants[4], new Swing(2, SwingType.R), testParticipants[1], new Swing(2, SwingType.R)),
-        new Encounter(testParticipants[1], new Swing(1, SwingType.R), testParticipants[2], new Swing(10, SwingType.R)),
-        new Encounter(testParticipants[3], new Swing(1, SwingType.L), testParticipants[1], new Swing(1, SwingType.L)),
-        new Encounter(testParticipants[3], new Swing(1, SwingType.R), testParticipants[2], new Swing(1, SwingType.L)),
-    };
 
     public EDM(){
         scanner = new Scanner(System.in);
         animatedOutputWithBlanks("--- Welcome to Elves & Dwarves Misfits ---", blank_title[0], blank_title[1]);
     }
 
-    public int setup(){
-        animatedOutput("Choose between automated control (1) or manual control (2) ", true);
-        animatedOutput("Control type : ", false);
+    public void setup(){
+        animatedOutput("Write the duration of the delay between chars (If You press enter default delay will be "+this.delay+") ", true);
+        animatedOutput("Delay duration : ", false);
         String input = scanner.nextLine();
-        if (input.equals("1") || input.equals("2"))
-            return Integer.parseInt(input);
-        return 0;
+        try {
+            if (!input.isEmpty())
+                this.delay = Integer.parseInt(input);
+        } catch (Exception e) {
+            setup();
+        }
     }
 
-    public void start(int contolType){
-        if (contolType == 1){
-            outputParticipants(Arrays.asList(testParticipants));
-            outputEncounters(Arrays.asList(testEncounters));
-        } else if (contolType == 2) {
-
-        } else {
-            animatedOutputWithBlanks("Something went wrong ! Please start from the beginning. ", blank_heading[0], blank_heading[1]);
-            start(setup());
+    public void start(){
+        File[] files = new File("Test_Samples").listFiles();
+        animatedOutput("\n\nWhich of the provided files would You like to check? Files 1 to "+files.length+" available (Write number)", true);
+        animatedOutput("Test : ", false);
+        String inputTestNumber = scanner.nextLine();
+        int testNumber = 0;
+        try {
+            testNumber = Integer.parseInt(inputTestNumber);
+            if (testNumber > files.length)
+                start();
+        } catch (Exception e) {
+            start();
         }
+        Test test = new Test(new String[]{"Test"+testNumber});
+        outputParticipants(test.getParticipants());
+        outputEncounters(test.getEncounters());
+        outputResult(test.getSortingTree());
+        animatedOutput("\n\nShould we continue ? (Type \"Y\") : ", false);
+        String inputContinue = scanner.nextLine();
+        if (inputContinue.toLowerCase().equals("y"))
+            start();
+        end();
     }
 
 
     public void end(){
+        System.out.println("\n\n\n");
         scanner.close();
+    }
+
+    public void outputResult(SortingTree sortingTree){
+        animatedOutputWithBlanks("- Output -", blank_heading[0], blank_heading[1]);
+        for (Participant[] couple : sortingTree.getCouples()) {
+            animatedOutput(couple[0].getName()+" : "+couple[1].getName(), true);
+        }
     }
 
     public void outputParticipants(List<Participant> participants){
         animatedOutputWithBlanks("- Participants -", blank_heading[0], blank_heading[1]);
-            String elves = "";
-            String dwarves = "";
-            for (Participant participant : participants) {
-                if (participant.getRace().equals(Race.Elf)) {
-                    elves += (!elves.isEmpty()) ? ", " + participant.getName() : participant.getName();
-                }
-                if (participant.getRace().equals(Race.Dwarf)){
-                    dwarves += (!dwarves.isEmpty()) ? ", " + participant.getName() : participant.getName();
-                }
+        String elves = "";
+        String dwarves = "";
+        for (Participant participant : participants) {
+            if (participant.getRace().equals(Race.Elf)) {
+                elves += (!elves.isEmpty()) ? ", " + participant.getName() : participant.getName();
             }
-            animatedOutput("Elves: "+elves, true);
-            animatedOutput("Dwarves: "+dwarves, true);
+            if (participant.getRace().equals(Race.Dwarf)){
+                dwarves += (!dwarves.isEmpty()) ? ", " + participant.getName() : participant.getName();
+            }
+        }
+        animatedOutput("Elves: "+elves, true);
+        animatedOutput("Dwarves: "+dwarves, true);
     }
 
     public void outputEncounters(List<Encounter> encounters){
         animatedOutputWithBlanks("- Encounters -", blank_heading[0], blank_heading[1]);
-            for (Encounter encounter : encounters) {
-                Participant elf = encounter.getElf();
-                Swing elvenSwing = encounter.getElfinSwing();
-                Participant dwarf = encounter.getDwarf();
-                Swing dwarvenSwing = encounter.getDwarvenSwing();
-                String output = elf.getName() + 
-                                " : " + 
-                                dwarf.getName() + 
-                                " = " + 
-                                elvenSwing.getSwingCount() + 
-                                elvenSwing.getSwingType() + 
-                                " x " + 
-                                dwarvenSwing.getSwingCount() + 
-                                dwarvenSwing.getSwingType();
-                animatedOutput(output, true);
-            }
+        for (Encounter encounter : encounters) {
+            Participant elf = encounter.getElf();
+            Swing elfinSwing = encounter.getElfinSwing();
+            Participant dwarf = encounter.getDwarf();
+            Swing dwarvenSwing = encounter.getDwarvenSwing();
+            String output = elf.getName() + 
+                            " : " + 
+                            dwarf.getName() + 
+                            " = " + 
+                            elfinSwing.getSwingCount() + 
+                            elfinSwing.getSwingType() + 
+                            " x " + 
+                            dwarvenSwing.getSwingCount() + 
+                            dwarvenSwing.getSwingType();
+            animatedOutput(output, true);
+        }
     }
 
     public void animatedOutput(String output, boolean end){
